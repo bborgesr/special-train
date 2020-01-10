@@ -225,6 +225,46 @@ timer$.pipe(takeUntil(cancelTimer$)).subscribe(
 
 //#endregion
 
+//#region Creating your own operators
+
+console.log("------------------ Creating Own Operators --------------------");
+function grabAndLogClassics(year, log) {
+  return source$ => {
+    return new Observable(subscriber => {
+      return source$.subscribe(
+        book => {
+          if (book.publicationYear < year) {
+            subscriber.next(book.title);
+            if (log) {
+              console.log(`Classic: ${book.title}`);
+            }
+          }
+        },
+        err => subscriber.error(err),
+        () => subscriber.complete()
+      );
+    });
+  };
+}
+
+function grabAndLogClassicsWithPipe(year, log) {
+  return source$ =>
+    source$.pipe(
+      filter(book => book.publicationYear < year),
+      tap(oldBook => (log ? console.log(`Title: ${oldBook.title}`) : null))
+    );
+}
+
+allBooksObservable$
+  .pipe(grabAndLogClassics(1930, false))
+  .subscribe(book => console.log(book));
+
+allBooksObservable$
+  .pipe(grabAndLogClassicsWithPipe(1930, true))
+  .subscribe(book => console.log(book));
+
+//#endregion
+
 //#region Sandbox
 // from https://medium.com/codingthesmartway-com-blog/getting-started-with-rxjs-part-1-setting-up-the-development-environment-creating-observables-db76ce053725
 /*
