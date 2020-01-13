@@ -5,7 +5,8 @@ import {
   fromEvent,
   concat,
   interval,
-  throwError
+  throwError,
+  Subject
 } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { filter, tap, catchError, take, takeUntil } from "rxjs/operators";
@@ -215,13 +216,13 @@ console.log("--------------- Controlling number of values -----------------");
 //   () => console.log("All done!") // executed
 // );
 
-let cancelTimer$ = fromEvent(timerButton, "click");
-timer$.pipe(takeUntil(cancelTimer$)).subscribe(
-  value =>
-    (timesDiv.innerHTML += `${new Date().getMilliseconds()} (${value}) <br />`),
-  null,
-  () => console.log("All done!") // executed!
-);
+// let cancelTimer$ = fromEvent(timerButton, "click");
+// timer$.pipe(takeUntil(cancelTimer$)).subscribe(
+//   value =>
+//     (timesDiv.innerHTML += `${new Date().getMilliseconds()} (${value}) <br />`),
+//   null,
+//   () => console.log("All done!") // executed!
+// );
 
 //#endregion
 
@@ -262,6 +263,27 @@ allBooksObservable$
 allBooksObservable$
   .pipe(grabAndLogClassicsWithPipe(1930, true))
   .subscribe(book => console.log(book));
+
+//#endregion
+
+//#region Using Subjects
+
+console.log("----------------------- Using Subjects -----------------------");
+
+let source$ = interval(1000).pipe(take(4));
+
+let subject$ = new Subject();
+source$.subscribe(subject$);
+
+subject$.subscribe(value => console.log(`Observer 1: ${value}`));
+
+setTimeout(() => {
+  subject$.subscribe(value => console.log(`Observer 2: ${value}`));
+}, 1000);
+
+setTimeout(() => {
+  subject$.subscribe(value => console.log(`Observer 3: ${value}`));
+}, 2000);
 
 //#endregion
 
